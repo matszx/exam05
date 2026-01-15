@@ -6,7 +6,7 @@ char**	create_board(int w, int h)
 
 	for (int i = 0; i < h; i++)
 	{
-		board[i] = (char*)malloc(sizeof(char) * w + 1);
+		board[i] = (char*)malloc(sizeof(char) * (w + 1));
 		for (int j = 0; j < w; j++)
 			board[i][j] = ' ';
 		board[i][w] = 0;
@@ -23,8 +23,7 @@ void	draw_moves(char** board, int w, int h)
 	int		y = 0;
 	int		drawing = 0;
 
-	read(STDIN_FILENO, &input, 1);
-	while (input)
+	while (read(STDIN_FILENO, &input, 1))
 	{
 		if (input == 'x')
 			drawing = !drawing;
@@ -50,7 +49,6 @@ void	draw_moves(char** board, int w, int h)
 		}
 		if (drawing)
 			board[y][x] = '0';
-		read(STDIN_FILENO, &input, 1);
 	}
 }
 
@@ -67,16 +65,60 @@ void	print_board(char** board)
 	}
 }
 
-void	free_board(char** board, int w, int h)
+void	free_board(char** board, int h)
 {
 	for (int i = 0; i < h; i++)
 		free(board[i]);
 	free(board);
 }
 
-void	iterate(char** board, int w, int h)
+int		count_neighbours(char** board, int w, int h, int x, int y)
 {
-	//char**	new_board = create_board(w, h);
+	int count = 0;
+
+	if (y > 0)
+	{
+		if (x > 0 && board[y-1][x-1] == '0')
+			count++;
+		if (board[y-1][x] == '0')
+			count++;
+		if (x < w - 1 && board[y-1][x+1] == '0')
+			count++;
+	}
+	if (x > 0 && board[y][x-1] == '0')
+			count++;
+	if (x < w - 1 && board[y][x+1] == '0')
+			count++;
+	if (y < h - 1)
+	{
+		if (x > 0 && board[y+1][x-1] == '0')
+			count++;
+		if (board[y+1][x] == '0')
+			count++;
+		if (x < w - 1 && board[y+1][x+1] == '0')
+			count++;
+	}
+	return count;
+}
+
+char**	iterate(char** board, int w, int h)
+{
+	char**	new_board = create_board(w, h);
+	int		n;
+
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			n = count_neighbours(board, w, h, j, i);
+			if (board[i][j] == '0' && (n == 2 || n == 3))
+				new_board[i][j] = '0';
+			else if (board[i][j] == ' ' && n == 3)
+				new_board[i][j] = '0';
+		}
+	}
+	free_board(board, h);
+	return new_board;
 }
 
 int	main(int argc, char** argv)
@@ -90,8 +132,8 @@ int	main(int argc, char** argv)
 	char**	board = create_board(w, h);
 	draw_moves(board, w, h);
 	while (it-- > 0)
-		iterate(board, w, h);
+		board = iterate(board, w, h);
 	print_board(board);
-	free_board(board, w, h);
+	free_board(board, h);
 	return 0;
 }
