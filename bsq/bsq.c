@@ -12,7 +12,7 @@ char*	ft_substr(char* str, int start, int len)
 
 int		get_elems(FILE* stream, t_elems* elems)
 {
-	int ret = fscanf(stream, "%d %c %c %c", &(elems->lines), &(elems->empty), &(elems->obst), &(elems->full));
+	int ret = fscanf(stream, "%d %c %c %c\n", &(elems->lines), &(elems->empty), &(elems->obst), &(elems->full));
 
 	if (ret != 4)
 		return 1;
@@ -50,14 +50,10 @@ int		load_map(FILE* stream, t_map* map, t_elems* elems)
 
 	char*	buf = NULL;
 	size_t	bufsize;
-	int		bytes_read = getline(&buf, &bufsize, stream);
 
-	if (bytes_read == -1)
-		return 1;
 	for (int i = 0; i < map->h; i++)
 	{
-		bytes_read = getline(&buf, &bufsize, stream);
-
+		int bytes_read = getline(&buf, &bufsize, stream);
 		if (bytes_read == -1)
 			return 1;
 		map->grid[i] = ft_substr(buf, 0, bytes_read);
