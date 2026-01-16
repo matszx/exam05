@@ -117,26 +117,38 @@ void	print_bsq(t_map* map, t_elems* elems, t_bsq* bsq)
 			map->grid[i][j] = elems->full;
 	}
 	for (int i = 0; i < map->h; i++)
-		fputs(map->grid[i], stdout);
+		fprintf(stdout, map->grid[i]);
 }
 
-int	main(int argc, char **argv)
+int		BSQ(char* filename, FILE* stream)
 {
-	FILE*		stream = fopen(argv[1], "r");
+	FILE*		file = stream;
 	t_map		map;
 	t_elems		elems;
 	t_bsq		bsq;
 
-	if (!stream)
+	if (filename)
+		file = fopen(filename, "r");
+	if (!file || get_elems(file, &elems) || load_map(file, &map, &elems) || check_elems(&map, &elems))
+	{
+		fprintf(stderr, "map error\n");
 		return 1;
-	if (get_elems(stream, &elems))
-		return 1;
-	if (load_map(stream, &map, &elems))
-		return 1;
-	fclose(stream);
-	for (int i = 0; i < map.h; i++)
-		fputs(map.grid[i], stdout);
+	}
 	find_bsq(&map, &elems, &bsq);
 	print_bsq(&map, &elems, &bsq);
+	return 0;
+}
+
+int	main(int argc, char **argv)
+{
+	if (argc == 1)
+		BSQ(NULL, stdin);
+	else if (argc == 2)
+		BSQ(argv[1], NULL);
+	else
+	{
+		for (int i = 1; i < argc; i++)
+			BSQ(argv[i], NULL);
+	}
 	return 0;
 }
